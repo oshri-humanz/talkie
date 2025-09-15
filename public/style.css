@@ -975,3 +975,136 @@ header p {
         font-size: 0.75rem;
     }
 }
+
+/* Tab Management Notification Styles */
+.tab-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 15px 25px;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+}
+
+.tab-notification.tab-active {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.tab-notification.tab-inactive {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+/* Enhanced pulse animation for inactive tab warning */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: translateX(-50%) scale(1.02);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+/* Tab notification mobile responsiveness */
+@media (max-width: 600px) {
+    .tab-notification {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        text-align: center;
+        padding: 12px 20px;
+    }
+
+    .notification-content {
+        justify-content: center;
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+}
+
+/* Keep tab active indicator */
+.tab-keep-active-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Wake lock status indicator */
+.wake-lock-indicator {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    z-index: 999;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Audio context status in console styling */
+.audio-context-warning {
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 300px;
+}
+
+@media (max-width: 600px) {
+
+    .tab-keep-active-indicator,
+    .wake-lock-indicator,
+    .audio-context-warning {
+        position: relative;
+        margin: 5px;
+        display: inline-block;
+    }
+}

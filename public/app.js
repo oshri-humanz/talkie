@@ -16,9 +16,16 @@ class PushToTalkApp {
         this.isPrivateTalking = false;
         this.beepSoundsEnabled = true;
 
+        // Tab management properties
+        this.isTabVisible = true;
+        this.wakeLock = null;
+        this.keepAliveInterval = null;
+        this.lastActivityTime = Date.now();
+
         this.initializeElements();
         this.setupEventListeners();
         this.setupSocketListeners();
+        this.setupTabManagement();
         this.detectUserName();
         this.loadBeepSettings();
         this.checkMicrophonePermission();
@@ -284,6 +291,12 @@ class PushToTalkApp {
 
         document.addEventListener('click', () => this.enableAudio(), { once: true });
         document.addEventListener('touchstart', () => this.enableAudio(), { once: true });
+
+        // Keep track of user activity
+        document.addEventListener('mousemove', () => this.updateActivity());
+        document.addEventListener('keydown', () => this.updateActivity());
+        document.addEventListener('touchstart', () => this.updateActivity());
+        document.addEventListener('click', () => this.updateActivity());
     }
 
     setupSocketListeners() {
@@ -376,6 +389,13 @@ class PushToTalkApp {
 
         this.socket.on('private-ice-candidate', async (data) => {
             await this.handlePrivateIceCandidate(data);
+        });
+
+        // Keep-alive pong handler
+        this.socket.on('pong', (data) => {
+            const latency = Date.now() - data.timestamp;
+            console.log(`💓 Keep-alive pong received - latency: ${latency}ms`);
+            this.updateActivity();
         });
     }
 
@@ -1184,6 +1204,292 @@ class PushToTalkApp {
     updateUserCount() {
         const userCards = document.querySelectorAll('.user-card');
         this.userCount.textContent = `${userCards.length} users online`;
+    }
+
+    // Tab Management Methods
+    setupTabManagement() {
+        console.log('🔄 Setting up tab management for Chrome...');
+
+        // Page Visibility API
+        this.setupPageVisibilityAPI();
+
+        // Wake Lock API (Chrome 84+)
+        this.requestWakeLock();
+
+        // Keep-alive mechanism
+        this.startKeepAlive();
+
+        // Audio context management
+        this.setupAudioContextManagement();
+
+        // Beforeunload warning
+        this.setupUnloadWarning();
+    }
+
+    setupPageVisibilityAPI() {
+        const handleVisibilityChange = () => {
+            this.isTabVisible = !document.hidden;
+            console.log(`👁️ Tab visibility changed: ${this.isTabVisible ? 'visible' : 'hidden'}`);
+
+            if (this.isTabVisible) {
+                console.log('✅ Tab is now active - resuming audio');
+                this.resumeAudioContext();
+                this.reconnectIfNeeded();
+                this.showTabActiveNotification();
+            } else {
+                console.log('⚠️ Tab is now inactive - maintaining connections');
+                this.showTabInactiveWarning();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        // Handle focus/blur for additional reliability
+        window.addEventListener('focus', () => {
+            this.isTabVisible = true;
+            this.resumeAudioContext();
+            this.updateActivity();
+        });
+
+        window.addEventListener('blur', () => {
+            this.isTabVisible = false;
+        });
+    }
+
+    async requestWakeLock() {
+        try {
+            if ('wakeLock' in navigator) {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                console.log('🔒 Wake lock acquired - screen will stay active');
+                this.showWakeLockIndicator(true);
+
+                this.wakeLock.addEventListener('release', () => {
+                    console.log('🔓 Wake lock released');
+                    this.showWakeLockIndicator(false);
+                });
+            } else {
+                console.log('⚠️ Wake Lock API not supported');
+            }
+        } catch (error) {
+            console.warn('❌ Failed to acquire wake lock:', error);
+        }
+    }
+
+    showWakeLockIndicator(isActive) {
+        const existingIndicator = document.querySelector('.wake-lock-indicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+
+        if (isActive) {
+            const indicator = document.createElement('div');
+            indicator.className = 'wake-lock-indicator';
+            indicator.innerHTML = '🔒 Screen Lock Active';
+            document.body.appendChild(indicator);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 5000);
+        }
+    }
+
+    startKeepAlive() {
+        // Send periodic ping to server to maintain connection
+        this.keepAliveInterval = setInterval(() => {
+            if (this.socket && this.socket.connected) {
+                this.socket.emit('ping', { timestamp: Date.now() });
+            }
+
+            // Maintain audio context
+            this.maintainAudioContext();
+
+        }, 10000); // Every 10 seconds
+
+        console.log('💓 Keep-alive mechanism started');
+    }
+
+    setupAudioContextManagement() {
+        // Ensure audio context doesn't get suspended
+        setInterval(() => {
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                console.log('🎵 Resuming suspended audio context');
+                this.audioContext.resume();
+            }
+        }, 1000);
+    }
+
+    setupUnloadWarning() {
+        window.addEventListener('beforeunload', (event) => {
+            if (this.socket && this.socket.connected) {
+                const message = 'You are currently in a voice chat. Are you sure you want to leave?';
+                event.preventDefault();
+                event.returnValue = message;
+                return message;
+            }
+        });
+    }
+
+    updateActivity() {
+        this.lastActivityTime = Date.now();
+    }
+
+    async resumeAudioContext() {
+        try {
+            if (this.audioContext && this.audioContext.state !== 'running') {
+                await this.audioContext.resume();
+                console.log('🎵 Audio context resumed');
+            }
+
+            // Resume all audio elements
+            this.remoteAudioElements.forEach(async (audio, userId) => {
+                try {
+                    if (audio.paused) {
+                        await audio.play();
+                        console.log(`▶️ Resumed audio for user ${userId}`);
+                    }
+                } catch (error) {
+                    console.warn(`❌ Failed to resume audio for user ${userId}:`, error);
+                }
+            });
+
+            this.privateAudioElements.forEach(async (audio, userId) => {
+                try {
+                    if (audio.paused) {
+                        await audio.play();
+                        console.log(`▶️ Resumed private audio for user ${userId}`);
+                    }
+                } catch (error) {
+                    console.warn(`❌ Failed to resume private audio for user ${userId}:`, error);
+                }
+            });
+
+        } catch (error) {
+            console.warn('❌ Failed to resume audio context:', error);
+        }
+    }
+
+    maintainAudioContext() {
+        if (this.audioContext) {
+            // Create a silent oscillator to keep context active
+            try {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                // Silent volume
+                gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+
+                oscillator.frequency.value = 440;
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.001);
+            } catch (error) {
+                // Ignore errors for this maintenance operation
+            }
+        }
+    }
+
+    reconnectIfNeeded() {
+        if (this.socket && !this.socket.connected) {
+            console.log('🔄 Attempting to reconnect socket...');
+            this.socket.connect();
+        }
+    }
+
+    showTabActiveNotification() {
+        if (!this.isTabVisible) return;
+
+        const notification = document.createElement('div');
+        notification.className = 'tab-notification tab-active';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">✅</span>
+                <span>Tab is active - voice chat ready</span>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+
+    showTabInactiveWarning() {
+        const notification = document.createElement('div');
+        notification.className = 'tab-notification tab-inactive';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <span class="notification-icon">⚠️</span>
+                <span>Keep this tab active for best voice quality</span>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Override the original playRemoteAudio to ensure tab activity
+    playRemoteAudio(stream, userId) {
+        console.log('Setting up audio for user:', userId);
+        this.updateActivity(); // Mark as active when receiving audio
+
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const audio = new Audio();
+        audio.srcObject = stream;
+        audio.volume = this.volume;
+        audio.muted = this.isMuted;
+        audio.autoplay = true;
+        audio.playsInline = true;
+
+        audio.setAttribute('data-user-id', userId);
+        this.remoteAudioElements.set(userId, audio);
+        document.body.appendChild(audio);
+
+        const playAudio = async () => {
+            try {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+                await audio.play();
+                console.log(`✅ Audio playing for user ${userId}`);
+                this.updateActivity(); // Mark as active when audio starts
+            } catch (error) {
+                console.warn(`❌ Audio autoplay blocked for user ${userId}:`, error);
+                this.showAudioPrompt(userId, audio);
+            }
+        };
+
+        playAudio();
+
+        audio.addEventListener('canplay', () => {
+            console.log('Audio can play for user:', userId);
+            playAudio();
+        });
+
+        audio.addEventListener('error', (e) => {
+            console.error(`Audio error for user ${userId}:`, e);
+        });
+
+        audio.addEventListener('loadeddata', () => {
+            console.log('Audio data loaded for user:', userId);
+            playAudio();
+        });
     }
 }
 

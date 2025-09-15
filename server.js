@@ -183,6 +183,12 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Keep-alive ping handler
+  socket.on("ping", (data) => {
+    // Respond with pong to maintain connection
+    socket.emit("pong", { timestamp: data.timestamp, serverTime: Date.now() });
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
     const user = users.get(socket.id);
