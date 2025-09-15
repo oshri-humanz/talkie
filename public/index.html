@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Talkie - Push to Talk</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 Talkie</h1>
+            <p>Push to Talk - Real-time Voice Chat</p>
+        </header>
+
+        <div class="user-info">
+            <input type="text" id="userName" placeholder="Your name will be detected automatically..." maxlength="20">
+            <button id="setNameBtn">Update Name</button>
+            <div class="name-info">
+                <small>💡 Your name is automatically detected and saved locally</small>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="connection-status" id="connectionStatus">Connecting...</div>
+            <div class="user-count" id="userCount">0 users online</div>
+        </div>
+
+        <div class="main-controls">
+            <button id="pushToTalk" class="ptt-button">
+                <span class="ptt-text">Hold to Talk</span>
+                <span class="ptt-icon">🎤</span>
+            </button>
+            <div class="ptt-instructions">
+                Hold the button or press <kbd>Space</kbd> to talk
+            </div>
+        </div>
+
+        <div class="users-list">
+            <h3>Online Users</h3>
+            <div id="usersList" class="users-grid"></div>
+        </div>
+
+        <div class="audio-controls">
+            <label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                Volume: <span id="volumeValue">50</span>%
+            </label>
+            <button id="muteBtn">🔊</button>
+            <button id="beepToggleBtn" class="beep-toggle-btn" title="Toggle beep sounds">🔔</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

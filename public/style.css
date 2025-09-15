@@ -1,0 +1,977 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.user-info {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.user-info input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.user-info input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.user-info button {
+    padding: 12px 24px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-info button:hover {
+    background: #5a6fd8;
+}
+
+.status {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.connection-status {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.connection-status.connected {
+    background: #4CAF50;
+    color: white;
+}
+
+.connection-status.disconnected {
+    background: #f44336;
+    color: white;
+}
+
+.user-count {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.main-controls {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.ptt-button {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, #f0f0f0, #cacaca);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #333;
+    margin: 0 auto 20px;
+}
+
+.ptt-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.ptt-button:active,
+.ptt-button.talking {
+    background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+    color: white;
+    transform: scale(0.95);
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.ptt-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.ptt-text {
+    font-weight: bold;
+}
+
+.ptt-instructions {
+    color: white;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.ptt-instructions kbd {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.users-list {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.users-list h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.user-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s;
+}
+
+.user-card.talking {
+    background: #fff3cd;
+    border-left-color: #ff6b6b;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.user-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.user-status {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.audio-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.audio-controls label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.audio-controls input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.audio-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+}
+
+.audio-controls button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.3s;
+}
+
+.audio-controls button:hover {
+    background: #5a6fd8;
+}
+
+.audio-controls button.muted {
+    background: #f44336;
+}
+
+/* Beep toggle button styles */
+.beep-toggle-btn {
+    background: #4CAF50 !important;
+    font-size: 1.1rem;
+    min-width: 50px;
+}
+
+.beep-toggle-btn.muted {
+    background: #f44336 !important;
+    opacity: 0.7;
+}
+
+.beep-toggle-btn:hover {
+    background: #45a049 !important;
+}
+
+.beep-toggle-btn.muted:hover {
+    background: #da190b !important;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .ptt-button {
+        width: 150px;
+        height: 150px;
+    }
+
+    .ptt-icon {
+        font-size: 2rem;
+    }
+
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audio-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Audio prompt styles */
+.audio-prompt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    text-align: center;
+}
+
+.audio-prompt-content button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.audio-prompt-content button:hover {
+    background: #5a6fd8;
+}
+
+/* Enhanced mobile support */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .ptt-button {
+        width: 180px;
+        height: 180px;
+        font-size: 16px;
+    }
+
+    .ptt-icon {
+        font-size: 2.5rem;
+    }
+
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audio-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .user-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .user-info input,
+    .user-info button {
+        width: 100%;
+    }
+
+    .status {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .connection-status,
+    .user-count {
+        text-align: center;
+    }
+}
+
+/* Touch-friendly improvements */
+.ptt-button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.ptt-button:active {
+    transform: scale(0.95);
+}
+
+/* Prevent text selection on mobile */
+.ptt-button,
+.ptt-text,
+.ptt-icon {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Better mobile audio controls */
+@media (max-width: 600px) {
+    .audio-controls input[type="range"] {
+        height: 8px;
+    }
+
+    .audio-controls input[type="range"]::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    .audio-controls button {
+        padding: 15px 20px;
+        font-size: 1.4rem;
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+    .container {
+        padding: 5px;
+    }
+
+    header {
+        margin-bottom: 15px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .ptt-button {
+        width: 120px;
+        height: 120px;
+    }
+
+    .ptt-icon {
+        font-size: 2rem;
+    }
+
+    .users-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+/* Name info styles */
+.name-info {
+    margin-top: 10px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.name-info small {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Enhanced user info section */
+.user-info {
+    position: relative;
+}
+
+.user-info::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 1px;
+}
+
+/* Auto-detection indicator */
+.user-info.detecting::before {
+    content: '🔍';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Improved input styling */
+.user-info input {
+    transition: all 0.3s ease;
+}
+
+.user-info input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Button hover effects */
+.user-info button {
+    transition: all 0.3s ease;
+}
+
+.user-info button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Success animation for name detection */
+@keyframes nameDetected {
+    0% {
+        background-color: #4CAF50;
+        transform: scale(1);
+    }
+
+    50% {
+        background-color: #45a049;
+        transform: scale(1.02);
+    }
+
+    100% {
+        background-color: #4CAF50;
+        transform: scale(1);
+    }
+}
+
+.user-info.success {
+    animation: nameDetected 0.6s ease-in-out;
+}
+
+/* Private chat styles */
+.private-chat-status {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.private-chat-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.private-chat-icon {
+    font-size: 1.5rem;
+}
+
+.private-chat-text {
+    font-size: 1.1rem;
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.end-private-chat-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.end-private-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+/* Enhanced user card styles for private chat */
+.user-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+.user-card.current-user {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    cursor: default;
+}
+
+.user-card.current-user:hover {
+    transform: none;
+}
+
+.user-card.in-private-chat {
+    background: #fff3e0;
+    border-left-color: #ff9800;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.user-card.in-private-chat:hover {
+    transform: none;
+}
+
+.user-actions {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.click-hint {
+    color: #667eea;
+    font-style: italic;
+}
+
+.private-indicator {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+/* Private chat talking indicator */
+.user-card.talking.private-talking {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    animation: privateCallPulse 1s infinite;
+}
+
+@keyframes privateCallPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+    }
+
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+    }
+}
+
+/* Better click affordance */
+.user-card:not(.current-user):not(.in-private-chat)::after {
+    content: '👆';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 0.8rem;
+}
+
+.user-card:not(.current-user):not(.in-private-chat):hover::after {
+    opacity: 0.7;
+}
+
+/* Microphone permission overlay styles */
+.microphone-permission-overlay,
+.microphone-error-overlay,
+.microphone-help-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.permission-content,
+.error-content,
+.help-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    margin: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.permission-icon,
+.error-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.permission-content h2,
+.error-content h2,
+.help-content h2 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.permission-content p,
+.error-content p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.permission-note {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 15px;
+}
+
+.device-note {
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border-left: 4px solid #4caf50;
+}
+
+.chrome-note {
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    border-left: 4px solid #2196f3;
+    font-size: 0.95rem;
+}
+
+.request-mic-btn,
+.retry-mic-btn,
+.help-mic-btn,
+.close-help-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 5px;
+}
+
+.request-mic-btn:hover,
+.retry-mic-btn:hover,
+.close-help-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.help-mic-btn {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.help-mic-btn:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.error-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.microphone-success-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(76, 175, 80, 0.4);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.success-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.success-icon {
+    font-size: 1.2rem;
+}
+
+/* Help dialog styles */
+.help-steps {
+    text-align: left;
+    margin: 20px 0;
+}
+
+.help-step {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.help-step strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.help-step ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.help-step li {
+    margin-bottom: 5px;
+    color: #555;
+}
+
+/* Mobile responsive for permission dialogs */
+@media (max-width: 600px) {
+
+    .permission-content,
+    .error-content,
+    .help-content {
+        margin: 10px;
+        padding: 20px;
+        max-width: none;
+    }
+
+    .permission-icon,
+    .error-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .request-mic-btn,
+    .retry-mic-btn,
+    .help-mic-btn,
+    .close-help-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .error-buttons {
+        flex-direction: column;
+    }
+
+    .microphone-success-message {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        text-align: center;
+    }
+}
+
+/* Mobile responsive for private chat */
+@media (max-width: 600px) {
+    .private-chat-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .private-chat-text {
+        min-width: auto;
+        text-align: center;
+    }
+
+    .end-private-chat-btn {
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    .user-actions {
+        font-size: 0.75rem;
+    }
+}
